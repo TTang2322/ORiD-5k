@@ -13,4 +13,3 @@ Adding support for CPU. Add ```--cpu``` can make the training or evaluation in c
 ./run.sh 
 
 Using the run.sh script to generate the training log and models of different versions of RESNET in 16-bit or 32-bit precision.	
-Then use the ipython notebook plot.ipynb to view the results.

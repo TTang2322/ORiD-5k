@@ -11,28 +11,28 @@ import torch.optim
 import torch.utils.data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-import resnet
+import vgg
 
-model_names = sorted(name for name in resnet.__dict__
+model_names = sorted(name for name in vgg.__dict__
     if name.islower() and not name.startswith("__")
-                     and name.startswith("resnet")
-                     and callable(resnet.__dict__[name]))
+                     and name.startswith("vgg")
+                     and callable(vgg.__dict__[name]))
 print(model_names)
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
-parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet18',
+parser.add_argument('--arch', '-a', metavar='ARCH', default='vgg19',
                     choices=model_names,
                     help='model architecture: ' + ' | '.join(model_names) +
-                    ' (default: resnet19)')
+                    ' (default: vgg19)')
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
-parser.add_argument('--epochs', default=100, type=int, metavar='N',
+parser.add_argument('--epochs', default=300, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
 parser.add_argument('-b', '--batch-size', default=128, type=int,
                     metavar='N', help='mini-batch size (default: 128)')
-parser.add_argument('--lr', '--learning-rate', default=0.002, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.05, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
@@ -65,9 +65,9 @@ def main():
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    model = resnet.__dict__[args.arch]()
+    model = vgg.__dict__[args.arch]()
 
-    # model.features = torch.nn.DataParallel(model.features)
+    model.features = torch.nn.DataParallel(model.features)
     if args.cpu:
         model.cpu()
     else:
@@ -115,7 +115,25 @@ def main():
                                                 batch_size=4,
                                                 shuffle=True,
                                                 )
-    
+
+    # train_loader = torch.utils.data.DataLoader(
+    #     datasets.CIFAR10(root='./data', train=True, transform=transforms.Compose([
+    #         transforms.RandomHorizontalFlip(),
+    #         transforms.RandomCrop(32, 4),
+    #         transforms.ToTensor(),
+    #         normalize,
+    #     ]), download=True),
+    #     batch_size=args.batch_size, shuffle=True,
+    #     num_workers=args.workers, pin_memory=True)
+
+    # val_loader = torch.utils.data.DataLoader(
+    #     datasets.CIFAR10(root='./data', train=False, transform=transforms.Compose([
+    #         transforms.ToTensor(),
+    #         normalize,
+    #     ])),
+    #     batch_size=args.batch_size, shuffle=False,
+    #     num_workers=args.workers, pin_memory=True)
+
     # define loss function (criterion) and pptimizer
     criterion = nn.CrossEntropyLoss()
     if args.cpu:
@@ -159,6 +177,7 @@ def main():
             'state_dict': model.state_dict(),
             'best_prec1': best_prec1,
         }, is_best, filename=os.path.join(args.save_dir, 'checkpoint_{}.tar'.format(epoch)))
+
 
 def train(train_loader, model, criterion, optimizer, epoch):
     """
