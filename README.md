@@ -1,5 +1,5 @@
 # pytorch-resnet-Adam-ODIR-5K
-This is the PyTorch implementation of RESNET network trained on ODiR dataset 
+This is the PyTorch implementation of RESNET and VGG network trained on ODiR dataset 
 
 ### Requirements. 
 [PyTorch] (https://github.com/pytorch/pytorch)
